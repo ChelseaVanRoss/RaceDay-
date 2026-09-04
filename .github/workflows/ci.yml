@@ -1,0 +1,50 @@
+name: CI - Validate Documentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check docs folder exists
+      run: |
+        if [ ! -d "./docs" ]; then
+          echo "❌ docs folder missing!"
+          exit 1
+        fi
+        echo "✅ docs folder exists"
+    
+    - name: Check required files
+      run: |
+        cd docs
+        if ! ls ERD.* 2>/dev/null | grep -qE '\.(png|pdf)$'; then
+          echo "❌ ERD file missing!"
+          exit 1
+        fi
+        if ! ls api-endpoints.* 2>/dev/null | grep -qE '\.(md|pdf)$'; then
+          echo "❌ API endpoints file missing!"
+          exit 1
+        fi
+        if ! ls *.sql 2>/dev/null | grep -qE '\.sql$'; then
+          echo "❌ SQL script missing!"
+          exit 1
+        fi
+        echo "✅ All documentation files present"
+    
+    - name: Check README exists
+      run: |
+        if [ ! -f "./README.md" ]; then
+          echo "❌ README.md missing!"
+          exit 1
+        fi
+        echo "✅ README.md exists"
+    
+    - name: All checks passed
+      run: echo "✅ Repository structure is valid!"
